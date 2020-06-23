@@ -1,6 +1,6 @@
-ALLTARGETS = profile-server profile-client
+ALLTARGETS = profile-server profile-client hfp-ag-sine-out
 
-CFLAGS = -Wall -Werror $(shell pkg-config --cflags --libs gio-unix-2.0)
+CFLAGS = -Wall -Werror $(shell pkg-config --cflags --libs gio-unix-2.0) -lbluetooth -lm
 
 all: $(ALLTARGETS)
 
