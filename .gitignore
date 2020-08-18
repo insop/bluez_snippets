@@ -54,3 +54,5 @@ dkms.conf
 /hfp-ag-sine-out
 /profile-client
 /profile-server
+
+.idea
