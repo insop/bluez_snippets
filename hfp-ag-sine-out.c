@@ -126,7 +126,6 @@ static void *sco_thread_func(void *arg)
 	struct bt_voice voice_opts = {0};
 	struct sco_options sco_opts = {0};
 	socklen_t sco_opts_len = sizeof(sco_opts);
-	int sco_data_len;
 	time_t end_time;
 
 	/* Wait for connection and fd to become available */
@@ -150,20 +149,17 @@ static void *sco_thread_func(void *arg)
 	ret = getsockopt(sock_fd, SOL_SCO, SCO_OPTIONS, &sco_opts, &sco_opts_len);
 	assert(ret != -1);
 
-	/* Reported mtu apparently includes 1 byte HCI Packet Type plus 3 bytes HCI SCO Data packet header */
-	sco_data_len = sco_opts.mtu - 4;
-
 	/* Send sine wave out */
 	for (i = 0; i < PCM_SINE_LEN; i++)
 		pcm_sine[i] = 32767. * sin((double)i * 2.0 * M_PI * (double)PCM_SINE_FREQ / (double)PCM_RATE);
 
-	assert(sco_data_len <= sizeof(sco_data_in));
+	assert(sco_opts.mtu <= sizeof(sco_data_in));
 	i = 0;
 	end_time = time(NULL) + 10;	/* Send the sine tone for 10 seconds */
 	while (time(NULL) < end_time) {
 		int bytes_read;
 		/* Use read to pace write (is there a better way?) */
-		bytes_read = read(sock_fd, &sco_data_in[0], sco_data_len);
+		bytes_read = read(sock_fd, &sco_data_in[0], sco_opts.mtu);
 		if (bytes_read != -1) {
 			sco_data_out_ptr = (unsigned char *)&pcm_sine[i];
 			i += bytes_read / 2;
